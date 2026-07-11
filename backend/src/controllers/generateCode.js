@@ -20,6 +20,19 @@ export const generateCode = async (req, res) =>{
                 message: "Invalid URL",
             });
         }
+
+        const parsed = new URL(url);
+        const myHost = new URL(ENV.BASE_URL);
+
+        if (
+            parsed.origin === myHost.origin &&
+            parsed.pathname.startsWith("/code/")
+        ) {
+            return res.status(400).json({
+                success: false,
+                message: "Cannot shorten an existing Linkora URL.",
+            });
+        }
         
         // if url is already mapped before then return same short code
         const existingURL = await sql`SELECT short_code FROM urls WHERE original_url=${url}`;
