@@ -6,6 +6,7 @@ import path from "path";
 import { connectDB } from "./lib/db.js";
 import { ENV } from "./lib/env.js";
 import cors from "cors";
+import { syncClicks } from "./workers/syncClicks.js";
 
 dotenv.config();
 
@@ -26,7 +27,40 @@ if(process.env.NODE_ENV === "production"){
 }
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, ()=> {
-    console.log("Server running on port " + PORT);
-    connectDB();
-});
+
+
+async function startBackgroundWorkers() {
+
+    try {
+        await syncClicks();
+    } catch (err) {
+        console.error("Initial sync failed:", err);
+    }
+
+    setInterval(async () => {
+        try {
+            await syncClicks();
+        } catch (err) {
+            console.error("Periodic sync failed:", err);
+        }
+    }, 60000);
+}
+
+async function startServer() {
+    try {
+        await connectDB();
+        console.log("Database connected");
+
+        await startBackgroundWorkers();
+
+        app.listen(PORT, () => {
+            console.log(`Server running on port ${PORT}`);
+        });
+
+    } catch (err) {
+        console.error("Failed to start server:", err);
+        process.exit(1);
+    }
+}
+
+startServer();
