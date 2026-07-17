@@ -2,3 +2,15 @@
 @plugin "daisyui" {
   themes: light --default, dark --prefersdark, corporate;
 }
+
+.auth-input-icon{
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    color: rgb(107 114 128);
+    pointer-events: none;
+    z-index: 10;
+}

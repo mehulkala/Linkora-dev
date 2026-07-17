@@ -1,43 +1,19 @@
 import { useState } from "react";
-import {Navbar} from "../components/Navbar";
-import {UrlForm} from "../components/UrlForm";
-import {UrlResult} from "../components/UrlResult";
+import {Navbar} from "../components/Navbar.jsx";
+import {UrlForm} from "../components/UrlForm.jsx";
+import {UrlResult} from "../components/UrlResult.jsx";
 import { axiosInstance } from "../lib/axios.js";
 import toast from "react-hot-toast";
 import { Hero } from "../components/Hero.jsx";
+import { urlStore } from "../store/urlStore.js";
 
 export function HomePage() {
-    const [result, setResult] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const handleGenerate = async (url) => {
-        try {
-            setLoading(true);
-            setResult(null);
-
-            const { data } = await axiosInstance.post("/generate-code", {
-                url,
-            });
-
-            setResult({
-                message: data.message,
-                ...data.data,
-            });
-
-            return true;
-
-        } catch (error) {
-            toast.error(
-                error.response?.data?.message ||
-                "Something went wrong"
-            );
-
-            return false;
-
-        } finally {
-            setLoading(false);
-        }
-    };
-
+    const {
+        result,
+        isGenerating,
+        generateShortUrl,
+    } = urlStore();
+    
     return (
         <>
             <Navbar />
@@ -46,7 +22,7 @@ export function HomePage() {
                   <Hero/>
                   <div className="card bg-base-100 shadow-xl border border-base-300">
                       <div className="card-body">
-                          <UrlForm onGenerate={handleGenerate} loading={loading} />
+                          <UrlForm onGenerate={generateShortUrl} loading={isGenerating} />
                       </div>
                   </div>
                   <UrlResult result={result} />

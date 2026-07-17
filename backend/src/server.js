@@ -21,7 +21,7 @@ app.use(cookieParser());
 
 app.use("/api", genRoute);
 app.use("/code", codeRoute);
-app.use("/auth", authRoutes);
+app.use("/api/auth", authRoutes);
 
 if(process.env.NODE_ENV === "production"){
     app.use(express.static(path.join(__dirname, "../frontend/dist")));

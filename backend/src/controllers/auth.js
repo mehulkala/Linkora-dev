@@ -7,8 +7,9 @@ const saltRounds = 10;
 
 export const loginHandle = async (req, res) =>{
     try{
-        const {identifier, password} = req.body;
-    
+        const identifier = req.body.identifier?.trim();
+        const password = req.body.password;
+        
         if(!identifier || !password){
             return res.status(400).json({
                 message: "Missing Credentials"
@@ -54,8 +55,10 @@ export const signupHandle = async (req, res) =>{
         // if yes then simply check for password and generate the jwt token if required 
         // else create a entry in users table and then generate a jwt token
         
-        const {username, email, password} = req.body;
-        
+        const username = req.body.username?.trim();
+        const email = req.body.email?.trim().toLowerCase();
+        const password = req.body.password;
+
         if(!username || !email || !password){
             return res.status(400).json({
                 message: "Missing Credentials"

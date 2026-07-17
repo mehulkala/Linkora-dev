@@ -23,6 +23,12 @@ export const generateCode = async (req, res) =>{
 
         const parsed = new URL(url);
         const myHost = new URL(ENV.BASE_URL);
+        const userId = req.user?.id;
+        if(!userId){
+            return res.status(401).json({
+                message: "Unauthorised"
+            })
+        }
 
         if (
             parsed.origin === myHost.origin &&
@@ -35,7 +41,7 @@ export const generateCode = async (req, res) =>{
         }
         
         // if url is already mapped before then return same short code
-        const existingURL = await sql`SELECT short_code FROM urls WHERE original_url=${url}`;
+        const existingURL = await sql`SELECT short_code FROM urls WHERE original_url=${url} AND user_id=${userId}`;
         if(existingURL.length>0){
             return res.status(200).json({
                 success: true,
@@ -61,7 +67,7 @@ export const generateCode = async (req, res) =>{
         if(tries===MAX_TRIES){
             throw new Error("Unable to generate a unique code");
         }
-        await sql`INSERT INTO urls (short_code, original_url) VALUES (${shortCode}, ${url})`;
+        await sql`INSERT INTO urls (short_code, original_url, user_id) VALUES (${shortCode}, ${url}, ${userId})`;
 
         return res.status(201).json({
             success: true,
