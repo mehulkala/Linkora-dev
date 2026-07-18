@@ -1,4 +1,5 @@
 import { sql } from "../lib/db.js";
+import { ENV } from "../lib/env.js";
 
 export const dashboard = async(req, res) => {
     try {
@@ -11,6 +12,11 @@ export const dashboard = async(req, res) => {
         const averageClicks = totalUrls===0? 0 : Math.round(totalClicks/totalUrls);
         const activeUrls = totalUrls;
 
+        const formattedUrls = urls.map(url=>({
+            ...url,
+            shortUrl: `${ENV.BASE_URL}/code/${url.short_code}`
+        }))
+
         return res.status(200).json({
             message: "Data Fetched Successfully",
             data: {
@@ -20,7 +26,7 @@ export const dashboard = async(req, res) => {
                     averageClicks: averageClicks,
                     activeUrls: activeUrls,
                 },
-                urls: urls
+                urls: formattedUrls
             }
         })
         

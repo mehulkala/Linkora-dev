@@ -1,7 +1,10 @@
 import { Link } from "react-router";
 import { Plus, LayoutDashboard } from "lucide-react";
+import { dashboardStore } from "../store/dashboardStore.js";
 
 export function DashboardHeader() {
+  const { isRefreshing, lastUpdated } = dashboardStore();
+
   return (
     <div className="card bg-base-100 shadow-xl border border-base-300">
       <div className="card-body">
@@ -28,13 +31,37 @@ export function DashboardHeader() {
           </div>
 
           {/* Right */}
-          <Link
-            to="/"
-            className="btn btn-primary gap-2 relative z-50"
-          >
-            <Plus size={18} />
-            New URL
-          </Link>
+          <div className="flex items-center gap-6">
+              {lastUpdated && (
+                  <div className="flex items-center gap-2 rounded-full bg-base-200 px-3 py-2 text-sm">
+                    {isRefreshing ? (
+                        <>
+                            <span className="loading loading-spinner loading-xs"></span>
+                            <span>Updating...</span>
+                        </>
+                    ) : (
+                        <>
+                            <span className="h-2 w-2 rounded-full bg-success"></span>
+                            <span>
+                                Updated{" "}
+                                {lastUpdated.toLocaleTimeString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                })}
+                            </span>
+                        </>
+                    )}
+                </div>
+              )}
+
+              <Link
+                  to="/"
+                  className="btn btn-primary gap-2"
+              >
+                  <Plus size={18} />
+                  New URL
+              </Link>
+          </div>
 
         </div>
 

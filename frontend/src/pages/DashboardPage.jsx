@@ -1,7 +1,7 @@
 import {Navbar} from "../components/Navbar.jsx";
 import {DashboardHeader} from "../components/DashboardHeader.jsx";
 import {StatsCards} from "../components/StatsCards.jsx";
-import SearchBar from "../components/SearchBar.jsx";
+import {SearchBar} from "../components/SearchBar.jsx";
 import SortDropdown from "../components/SortDropdown.jsx";
 import UrlTable from "../components/UrlTable.jsx";
 import { dashboardStore } from "../store/dashboardStore.js";
@@ -11,9 +11,9 @@ export function DashboardPage(){
     const {fetchDashboard} = dashboardStore();
 
     useEffect(()=>{
-        fetchDashboard();
+        fetchDashboard(true);
         const interval = setInterval(() => {
-            fetchDashboard();
+            fetchDashboard(false);
         }, 60000);
 
         return () => clearInterval(interval);
@@ -32,7 +32,7 @@ export function DashboardPage(){
             </div>
             <StatsCards />
 
-            <div className="controls">
+            <div className="mt-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <SearchBar />
                 <SortDropdown />
             </div>

@@ -19,8 +19,16 @@ export const dashboardStore = create((set, get) => ({
 
     isLoading: false,
 
-    fetchDashboard: async () => {
-        set({ isLoading: true });
+    isRefreshing: false,
+
+    lastUpdated: null,
+
+    fetchDashboard: async (initialLoad=false) => {  
+        if(initialLoad){
+            set({isLoading: true});
+        }else{
+            set({isRefreshing: true});
+        }
 
         try {
 
@@ -32,6 +40,7 @@ export const dashboardStore = create((set, get) => ({
             set({
                 stats: res.data.data.stats,
                 urls: res.data.data.urls,
+                lastUpdated: new Date(),
             });
 
         } catch (error) {
@@ -42,7 +51,11 @@ export const dashboardStore = create((set, get) => ({
             );
 
         } finally {
-            set({ isLoading: false });
+            if(initialLoad){
+                set({isLoading: false});
+            }else{
+                set({isRefreshing: false});
+            }
         }
     },
 

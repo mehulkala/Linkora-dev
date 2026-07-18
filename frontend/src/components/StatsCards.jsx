@@ -7,9 +7,15 @@ import {
 
 import { StatCard } from "./StatCard";
 import { dashboardStore } from "../store/dashboardStore.js";
+import { StatsCardsSkeleton } from "./StatsCardsSkeleton.jsx";
 
 export function StatsCards() {
-  const {stats} = dashboardStore();
+  const {stats, isLoading} = dashboardStore();
+  
+  if (isLoading) {
+      return <StatsCardsSkeleton />;
+  }
+
   return (
     <div className="mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
 
