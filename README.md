@@ -6,7 +6,7 @@
 
 A modern full-stack URL shortening platform built using **React, Node.js, PostgreSQL, and Redis**, featuring secure authentication, real-time analytics, Redis-backed click tracking, and an optimized background synchronization architecture.
 
-[Live Demo](YOUR_FRONTEND_URL) • [Backend API](YOUR_BACKEND_URL)
+[Live Demo](https://linkora-dev.onrender.com/)
 
 </div>
 
@@ -82,19 +82,19 @@ A modern full-stack URL shortening platform built using **React, Node.js, Postgr
 
 ## Home Page
 
-> Add screenshot
+![Home Page](images/home.png)
 
 ---
 
 ## Dashboard
 
-> Add screenshot
+![Dashboard](images/dashboard.png)
 
 ---
 
 ## Login
 
-> Add screenshot
+![Login Page](images/login.png)
 
 ---
 
@@ -181,7 +181,7 @@ Linkora
 ## Clone Repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/linkora.git
+git clone https://github.com/mehulkala/Linkora-dev.git
 
 cd linkora
 ```
@@ -198,18 +198,24 @@ npm install
 npm run dev
 ```
 
-Create a `.env`
+Create a `.env` in backend
 
 ```env
 PORT=
 
+NODE_ENV=
+
 DATABASE_URL=
 
-JWT_SECRET=
+CLIENT_URL=
 
 BASE_URL=
 
-REDIS_URL=
+UPSTASH_REDIS_REST_URL=
+
+UPSTASH_REDIS_REST_TOKEN=
+
+JWT_SECRET=
 ```
 
 ---
@@ -285,6 +291,6 @@ npm run dev
 
 **Mehul Kala**
 
-GitHub: https://github.com/YOUR_USERNAME
+GitHub: https://github.com/mehulkala
 
-LinkedIn: https://linkedin.com/in/YOUR_PROFILE
+LinkedIn: https://www.linkedin.com/in/mehul-kala/
