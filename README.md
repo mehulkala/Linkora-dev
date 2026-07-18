@@ -100,24 +100,7 @@ A modern full-stack URL shortening platform built using **React, Node.js, Postgr
 
 # 🏗 System Architecture
 
-```
-
-                     React + Zustand
-                             │
-                             ▼
-                      Express REST API
-                             │
-          ┌──────────────────┴──────────────────┐
-          │                                     │
-          ▼                                     ▼
-     PostgreSQL                         Upstash Redis
-          ▲                                     │
-          │                                     │
-          └──────── Background Worker ──────────┘
-                Sync Redis → PostgreSQL
-                 Every 60 Seconds
-
-```
+![System Architecture](/images/architecture.png)
 
 ---
 
