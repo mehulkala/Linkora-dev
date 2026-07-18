@@ -19,6 +19,7 @@ A modern full-stack URL shortening platform built using **React, Node.js, Postgr
 - Secure Signup & Login
 - JWT Authentication
 - HTTP-only Cookies
+- Persistent Login Sessions
 - Protected Dashboard
 
 ### 🔗 URL Shortening
@@ -26,7 +27,6 @@ A modern full-stack URL shortening platform built using **React, Node.js, Postgr
 - Generate unique short URLs
 - One-click copy
 - Instant redirection
-- Delete URLs
 
 ### 📊 Analytics Dashboard
 
@@ -100,7 +100,7 @@ A modern full-stack URL shortening platform built using **React, Node.js, Postgr
 
 # 🏗 System Architecture
 
-![System Architecture](/images/architecture.png)
+![System Architecture](images/architecture.png)
 
 ---
 
@@ -108,22 +108,28 @@ A modern full-stack URL shortening platform built using **React, Node.js, Postgr
 
 ```
 
-User clicks Short URL
-│
-▼
-Redis Click Counter
-│
-▼
-Redirect User Immediately
-│
-▼
-Background Worker (60 sec)
-│
-▼
+User requests Short URL
+        │
+        ▼
+Express Route (/code/:shortCode)
+        │
+        ▼
+Controller
+        │
+        ├── Increment Redis Counter
+        │
+        ▼
+Fetch Original URL
+        │
+        ▼
+302 Redirect
+        │
+───────────────
+Background Worker
+(every 60 seconds)
+        │
+        ▼
 Batch Update PostgreSQL
-│
-▼
-Dashboard Analytics
 
 ```
 
@@ -153,6 +159,8 @@ Linkora
 │   ├── lib
 │   └── App.jsx
 │
+├── images
+|
 └── README.md
 
 ```
@@ -166,7 +174,7 @@ Linkora
 ```bash
 git clone https://github.com/mehulkala/Linkora-dev.git
 
-cd linkora
+cd linkora-dev
 ```
 
 ---
@@ -224,6 +232,7 @@ npm run dev
 | POST | `/signup` | Register User |
 | POST | `/login` | Login |
 | POST | `/logout` | Logout |
+| GET | `/auth/me` | Get the currently authenticated user's profile |
 
 ---
 
@@ -232,7 +241,6 @@ npm run dev
 | Method | Endpoint | Description |
 |---------|----------|-------------|
 | POST | `/generate-code` | Create Short URL |
-| DELETE | `/urls/:id` | Delete URL |
 | GET | `/code/:shortCode` | Redirect |
 
 ---
@@ -248,9 +256,9 @@ npm run dev
 # 💡 Engineering Highlights
 
 - JWT authentication using HTTP-only cookies
-- Cache-first architecture using Redis
+- Designed a Redis-backed click tracking system with batched synchronization to PostgreSQL.
 - Background synchronization worker
-- Batched database writes
+- Reduced PostgreSQL write operations.
 - Responsive analytics dashboard
 - Global state management using Zustand
 - Skeleton loading for improved UX
