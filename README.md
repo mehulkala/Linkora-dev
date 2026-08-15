@@ -2,9 +2,9 @@
 
 # 🔗 Linkora
 
-### Fast • Secure • Simple URL Shortener with Analytics
+### Fast • Secure URL Shortener with Analytics
 
-A modern full-stack URL shortening platform built using **React, Node.js, PostgreSQL, and Redis**, featuring secure authentication, real-time analytics, Redis-backed click tracking, and an optimized background synchronization architecture.
+A modern full-stack URL shortening platform built using **React, Node.js, PostgreSQL, and Redis**, featuring secure authentication, Redis-backed click tracking, configurable rate limiting, near real-time analytics, and an optimized background synchronization architecture.
 
 [Live Demo](https://linkora-dev.onrender.com/)
 
@@ -51,6 +51,14 @@ A modern full-stack URL shortening platform built using **React, Node.js, Postgr
 - Significantly reduces database writes
 - Near real-time analytics
 
+### 🛡️ Rate Limiting
+
+- Configurable per-IP rate limiting
+- Endpoint-specific request limits
+- Redis-backed request counters
+- Atomic `INCR` + `EXPIRE` operations using Lua scripts
+- Returns `429 Too Many Requests` when the limit is exceeded
+
 ---
 
 # 🛠 Tech Stack
@@ -73,6 +81,7 @@ A modern full-stack URL shortening platform built using **React, Node.js, Postgr
 - Express.js
 - PostgreSQL
 - Upstash Redis
+- Redis Lua Scripting
 - JWT
 - NanoID
 
@@ -135,6 +144,31 @@ Batch Update PostgreSQL
 
 This architecture minimizes database writes while maintaining near real-time analytics.
 
+---
+
+# 🛡️ Rate Limiting Flow
+
+```
+Client Request
+      │
+      ▼
+Express Rate Limiter
+      │
+      ▼
+Redis Lua Script
+      │
+      ├── INCR request counter
+      │
+      ├── EXPIRE on first request
+      │
+      ▼
+Check Request Limit
+      │
+      ├── Within limit ──────► next()
+      │
+      └── Limit exceeded ───► 429 Too Many Requests
+```
+Rate limits are configurable on a per-endpoint basis, allowing sensitive endpoints such as URL generation and authentication to have stricter limits.
 ---
 
 # 📂 Project Structure
@@ -257,6 +291,8 @@ npm run dev
 
 - JWT authentication using HTTP-only cookies
 - Designed a Redis-backed click tracking system with batched synchronization to PostgreSQL.
+- Implemented configurable per-IP rate limiting using Redis
+- Used Lua scripting to atomically execute rate-limit counter and expiration operations
 - Background synchronization worker
 - Reduced PostgreSQL write operations.
 - Responsive analytics dashboard
@@ -272,7 +308,6 @@ npm run dev
 - Custom aliases
 - URL expiration
 - Click history graphs
-- Rate limiting
 - Custom domains
 - Advanced analytics
 
