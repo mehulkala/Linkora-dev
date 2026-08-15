@@ -70,6 +70,8 @@ export const dashboardStore = create((set, get) => ({
             set({
                 urls: get().urls.filter(url => url.id !== id),
             });
+            
+            await get().fetchDashboard();
 
             toast.success("URL deleted");
 
