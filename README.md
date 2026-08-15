@@ -81,7 +81,6 @@ A modern full-stack URL shortening platform built using **React, Node.js, Postgr
 - Express.js
 - PostgreSQL
 - Upstash Redis
-- Redis Lua Scripting
 - JWT
 - NanoID
 
@@ -160,6 +159,8 @@ Redis Lua Script
       ├── INCR request counter
       │
       ├── EXPIRE on first request
+      │
+      ├── Return request count
       │
       ▼
 Check Request Limit
@@ -290,11 +291,11 @@ npm run dev
 # 💡 Engineering Highlights
 
 - JWT authentication using HTTP-only cookies
-- Designed a Redis-backed click tracking system with batched synchronization to PostgreSQL.
+- Designed a Redis-backed click tracking system with batched synchronization to PostgreSQL
 - Implemented configurable per-IP rate limiting using Redis
 - Used Lua scripting to atomically execute rate-limit counter and expiration operations
 - Background synchronization worker
-- Reduced PostgreSQL write operations.
+- Reduced PostgreSQL write operations
 - Responsive analytics dashboard
 - Global state management using Zustand
 - Skeleton loading for improved UX
