@@ -1,8 +1,10 @@
 import toast from "react-hot-toast";
+import { useState } from "react";
+import { QRCodeModal } from "./QRCodeModal.jsx";
 
 export function UrlResult({ result }) {
+    const [showQR, setShowQR] = useState(false);
     if (!result) return null;
-
     const handleCopy = async () => {
         try {
             await navigator.clipboard.writeText(result.shortUrl);
@@ -62,6 +64,13 @@ export function UrlResult({ result }) {
                         📋 Copy
                     </button>
 
+                    <button
+                        className="btn btn-outline"
+                        onClick={() => setShowQR(true)}
+                    >
+                        📱 QR
+                    </button>
+
                     <a
                         href={result.shortUrl}
                         target="_blank"
@@ -71,6 +80,12 @@ export function UrlResult({ result }) {
                         🔗 Open
                     </a>
 
+                    {showQR && (
+                        <QRCodeModal
+                            shortUrl={result.shortUrl}
+                            onClose={() => setShowQR(false)}
+                        />
+                    )}
                 </div>
 
             </div>

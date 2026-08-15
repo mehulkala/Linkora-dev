@@ -1,6 +1,8 @@
-import { Trash2, Copy, ExternalLink } from "lucide-react";
+import { Trash2, Copy, ExternalLink, QrCode } from "lucide-react";
 import { dashboardStore } from "../store/dashboardStore.js";
 import { UrlTableSkeleton } from "./UrlTableSkeleton.jsx";
+import { useState } from "react";
+import { QRCodeModal } from "./QRCodeModal.jsx";
 
 export default function UrlTable() {
     const {
@@ -11,6 +13,8 @@ export default function UrlTable() {
         copyUrl,
         isLoading
     } = dashboardStore();
+
+    const [qrUrl, setQrUrl] = useState(null);
 
     if (isLoading) {
         return <UrlTableSkeleton/>
@@ -112,11 +116,25 @@ export default function UrlTable() {
                                     </button>
 
                                     <button
+                                        className="btn btn-sm btn-outline"
+                                        onClick={() => setQrUrl(url.shortUrl)}
+                                    >
+                                        <QrCode size={16} />
+                                    </button>
+
+                                    <button
                                         className="btn btn-sm btn-error btn-outline"
                                         onClick={() => deleteUrl(url.id)}
                                     >
                                         <Trash2 size={16} />
                                     </button>
+
+                                    {qrUrl && (
+                                        <QRCodeModal
+                                            shortUrl={qrUrl}
+                                            onClose={() => setQrUrl(null)}
+                                        />
+                                    )}
                                 </div>
                             </td>
                         </tr>
