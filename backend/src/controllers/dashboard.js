@@ -5,13 +5,24 @@ import { redis } from "../lib/redis.js";
 export const dashboard = async(req, res) => {
     try {
         const userId = req.user.id;
-        const stats = await sql`SELECT COUNT(*) total_urls, COALESCE(SUM(click_count), 0) total_clicks FROM urls WHERE user_id=${userId}`;
-        const urls = await sql`SELECT id, short_code, original_url, click_count, created_at FROM urls WHERE user_id=${userId} ORDER BY created_at DESC`;
+        const stats = await sql`
+    SELECT
+        COUNT(*) AS total_urls,
+        COUNT(*) FILTER (
+            WHERE expires_at IS NULL OR expires_at > NOW()
+        ) AS active_urls,
+        COALESCE(SUM(click_count), 0) AS total_clicks
+    FROM urls
+    WHERE user_id=${userId}
+`;
+        const urls = await sql`SELECT id, short_code, original_url, click_count, created_at, expires_at FROM urls WHERE user_id=${userId} ORDER BY created_at DESC`;
         const totalClicks = Number(stats[0].total_clicks);
         const totalUrls = Number(stats[0].total_urls);
+        const activeUrls = Number(stats[0].active_urls);
 
-        const averageClicks = totalUrls===0? 0 : Math.round(totalClicks/totalUrls);
-        const activeUrls = totalUrls;
+        const averageClicks = totalUrls === 0
+            ? 0
+            : Math.round(totalClicks / totalUrls);
 
         const formattedUrls = urls.map(url=>({
             ...url,

@@ -4,6 +4,50 @@ import { UrlTableSkeleton } from "./UrlTableSkeleton.jsx";
 import { useState } from "react";
 import { QRCodeModal } from "./QRCodeModal.jsx";
 
+const getExpirationInfo = (expiresAt) => {
+    if (!expiresAt) {
+        return {
+            label: "Never",
+            title: "This link never expires",
+            expired: false,
+        };
+    }
+
+    const expiration = new Date(expiresAt);
+    const now = new Date();
+
+    if (expiration <= now) {
+        return {
+            label: "Expired",
+            title: `Expired on ${expiration.toLocaleString("en-IN")}`,
+            expired: true,
+        };
+    }
+
+    const diffMs = expiration - now;
+    const diffMinutes = Math.ceil(diffMs / (1000 * 60));
+
+    const days = Math.floor(diffMinutes / (60 * 24));
+    const hours = Math.floor((diffMinutes % (60 * 24)) / 60);
+    const minutes = diffMinutes % 60;
+
+    let label;
+
+    if (days > 0) {
+        label = `Expires in ${days}d`;
+    } else if (hours > 0) {
+        label = `Expires in ${hours}h`;
+    } else {
+        label = `Expires in ${minutes}m`;
+    }
+
+    return {
+        label,
+        title: `Expires on ${expiration.toLocaleString("en-IN")}\n${days}d ${hours}h ${minutes}m remaining`,
+        expired: false,
+    };
+};
+
 export default function UrlTable() {
     const {
         urls,
@@ -73,6 +117,7 @@ export default function UrlTable() {
                         <th>Original URL</th>
                         <th>Clicks</th>
                         <th>Created</th>
+                        <th>Expires</th>
                         <th className="text-center">Actions</th>
                     </tr>
                 </thead>
@@ -104,6 +149,27 @@ export default function UrlTable() {
                                     month: "short",
                                     year: "numeric",
                                 })}
+                            </td>
+
+                            <td>
+                                {(() => {
+                                    const info = getExpirationInfo(url.expires_at);
+
+                                    return (
+                                        <span
+                                            className={`badge ${
+                                                info.expired
+                                                    ? "badge-error badge-outline"
+                                                    : url.expires_at
+                                                        ? "badge-warning badge-outline"
+                                                        : "badge-success badge-outline"
+                                            }`}
+                                            title={info.title}
+                                        >
+                                            {info.label}
+                                        </span>
+                                    );
+                                })()}
                             </td>
 
                             <td>

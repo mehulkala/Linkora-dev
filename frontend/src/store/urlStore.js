@@ -5,7 +5,7 @@ import toast from "react-hot-toast";
 export const urlStore = create((set, get) => ({
     result: null,
     isGenerating: false,
-    generateShortUrl: async (url) => {
+    generateShortUrl: async (url, expiration) => {
         try {
 
             set({isGenerating:true});
@@ -13,6 +13,7 @@ export const urlStore = create((set, get) => ({
             
             const { data } = await axiosInstance.post("/generate-code", {
                 url,
+                expiration
             });
 
             set({result:{

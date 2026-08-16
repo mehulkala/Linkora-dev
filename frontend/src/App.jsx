@@ -8,7 +8,7 @@ import PageLoader from './components/PageLoader.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import SignupPage from './pages/SignupPage.jsx';
 import { DashboardPage } from './pages/DashboardPage.jsx';
-
+import { ExpiredLinkPage } from './pages/ExpiredLinkPage.jsx';
 
 
 function App() {
@@ -25,6 +25,7 @@ function App() {
         <Route path="/login" element={!authUser? <LoginPage/> : <Navigate to="/"/>}/>
         <Route path="/signup" element={!authUser? <SignupPage/> : <Navigate to="/"/>}/>
         <Route path="/dashboard" element={authUser? <DashboardPage/> : <Navigate to="/login"/>}/>
+        <Route path="/expired" element={<ExpiredLinkPage/>}/>
       </Routes>
       <Toaster/>
     </div>

@@ -4,14 +4,16 @@ import { ENV } from "../lib/env.js";
 
 export const generateCode = async (req, res) =>{
     try {
-        const {url} = req.body;
+        const {url, expiration} = req.body;
+
+        
         if (!url) {
             return res.status(400).json({
                 success: false,
                 message: "URL is required",
             });
         }
-
+        
         try {
             new URL(url);
         } catch {
@@ -19,6 +21,38 @@ export const generateCode = async (req, res) =>{
                 success: false,
                 message: "Invalid URL",
             });
+        }
+
+        const allowedExpirations = ["1h", "1d", "7d", "30d", "never"]
+        if (!expiration || !allowedExpirations.includes(expiration)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid expiration option",
+            });
+        }
+
+        let expiresAt = null;
+
+        switch (expiration) {
+            case "1h":
+                expiresAt = new Date(Date.now() + 60 * 60 * 1000);
+                break;
+
+            case "1d":
+                expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+                break;
+
+            case "7d":
+                expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+                break;
+
+            case "30d":
+                expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+                break;
+
+            case "never":
+                expiresAt = null;
+                break;
         }
 
         const parsed = new URL(url);
@@ -39,9 +73,10 @@ export const generateCode = async (req, res) =>{
                 message: "Cannot shorten an existing Linkora URL.",
             });
         }
+
         
         // if url is already mapped before then return same short code
-        const existingURL = await sql`SELECT short_code FROM urls WHERE original_url=${url} AND user_id=${userId}`;
+        const existingURL = await sql`SELECT short_code FROM urls WHERE original_url=${url} AND user_id=${userId} AND (expires_at IS NULL OR expires_at > NOW())`;
         if(existingURL.length>0){
             return res.status(200).json({
                 success: true,
@@ -67,7 +102,9 @@ export const generateCode = async (req, res) =>{
         if(tries===MAX_TRIES){
             throw new Error("Unable to generate a unique code");
         }
-        await sql`INSERT INTO urls (short_code, original_url, user_id) VALUES (${shortCode}, ${url}, ${userId})`;
+
+
+        await sql`INSERT INTO urls (short_code, original_url, user_id, expires_at) VALUES (${shortCode}, ${url}, ${userId}, ${expiresAt})`;
 
         return res.status(201).json({
             success: true,

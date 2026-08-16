@@ -1,5 +1,6 @@
 import {sql} from "../lib/db.js";
 import { redis } from "../lib/redis.js";
+import { ENV } from "../lib/env.js";
 
 export const codeRedirection = async (req, res) => {
     //check in the redis database for the shortCode and then try to check for the database
@@ -28,18 +29,31 @@ export const codeRedirection = async (req, res) => {
         console.log(req.params);
         const {id: shortCode} = req.params;
         console.log(shortCode);
-        const result = await sql`UPDATE urls SET click_count = click_count + 1 WHERE short_code = ${shortCode} RETURNING original_url`;
-        if(result.length === 0){
+        const query = await sql`SELECT original_url, expires_at FROM urls WHERE short_code=${shortCode}`;
+        if(query.length === 0){
             return res.status(404).json({
-                success: false,
-                error: "No matching url found"
-            });
+                message: "No matching url found"
+            })
         }
 
-        // adding the key value pair for the url into the redis databse
-        await redis.set(shortCode, result[0].original_url);
+        const {original_url, expires_at} = query[0];
+        if(expires_at && new Date() >= new Date(expires_at)){
+            return res.redirect(302, `${ENV.CLIENT_URL}/expired`);
+        }
 
-        return res.redirect(302, result[0].original_url);
+        const result = await sql`UPDATE urls SET click_count = click_count + 1 WHERE short_code = ${shortCode}`;
+
+        // adding the key value pair for the url into the redis databse
+        if(expires_at){
+            const ttl = Math.ceil((new Date(expires_at).getTime()- Date.now())/1000);
+            if(ttl>0){
+                await redis.set(shortCode, original_url, {ex: ttl});
+            }
+        }else{
+            await redis.set(shortCode, original_url);
+        }
+
+        return res.redirect(302, original_url);
     }catch(error){
         console.error("Error redirecting URL:", error);
         return res.status(500).json({

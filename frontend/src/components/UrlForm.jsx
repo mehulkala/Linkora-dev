@@ -2,13 +2,14 @@ import { useState } from "react";
 
 export function UrlForm({ onGenerate, loading }) {
     const [url, setUrl] = useState("");
+    const [expiration, setExpiration] = useState("1d");
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!url.trim()) return;
 
-        const success = await onGenerate(url);
+        const success = await onGenerate(url, expiration);
 
         if (success) {
             setUrl("");
@@ -36,6 +37,19 @@ export function UrlForm({ onGenerate, loading }) {
                         disabled={loading}
                         required
                     />
+
+                    <select
+                        className="select select-bordered select-lg h-14"
+                        value={expiration}
+                        onChange={(e) => setExpiration(e.target.value)}
+                        disabled={loading}
+                    >
+                        <option value="1h">1 Hour</option>
+                        <option value="1d">1 Day</option>
+                        <option value="7d">7 Days</option>
+                        <option value="30d">30 Days</option>
+                        <option value="never">Never</option>
+                    </select>
 
                     <button
                         type="submit"
