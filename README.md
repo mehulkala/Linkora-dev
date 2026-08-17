@@ -4,7 +4,7 @@
 
 ### Fast • Secure URL Shortener with Analytics
 
-A modern full-stack URL shortening platform built using **React, Node.js, PostgreSQL, and Redis**, featuring secure authentication, Redis-backed click tracking, configurable rate limiting, near real-time analytics, and an optimized background synchronization architecture.
+A modern full-stack URL shortening platform built using **React, Node.js, PostgreSQL, and Redis**, featuring secure authentication, Redis-backed click tracking, configurable rate limiting, URL expiration, QR code generation, near real-time analytics, and an optimized background synchronization architecture.
 
 [Live Demo](https://linkora-dev.onrender.com/)
 
@@ -16,48 +16,60 @@ A modern full-stack URL shortening platform built using **React, Node.js, Postgr
 
 ### 🔐 Authentication
 
-- Secure Signup & Login
-- JWT Authentication
-- HTTP-only Cookies
-- Persistent Login Sessions
-- Protected Dashboard
+* Secure Signup & Login
+* JWT Authentication
+* HTTP-only Cookies
+* Persistent Login Sessions
+* Protected Dashboard
 
 ### 🔗 URL Shortening
 
-- Generate unique short URLs
-- One-click copy
-- Instant redirection
+* Generate unique short URLs
+* One-click copy
+* Instant redirection
+* Delete shortened URLs
+* Configurable URL expiration
+* Automatic handling of expired URLs
+
+### 📱 QR Code Generation
+
+* Generate QR codes for shortened URLs
+* QR codes are generated directly on the frontend
+* Uses `qrcode.react`
+* Quickly scan and access shortened links
+* QR codes can be generated directly from the dashboard
 
 ### 📊 Analytics Dashboard
 
-- Total URLs
-- Total Clicks
-- Average Clicks
-- Active URLs
-- Search URLs
-- Sort by
-  - Newest
-  - Oldest
-  - Most Clicked
-  - Least Clicked
-- Automatic refresh every minute
-- Skeleton loading UI
-- Last updated status
+* Total URLs
+* Total Clicks
+* Average Clicks
+* Active URLs
+* Search URLs
+* Sort by
+
+  * Newest
+  * Oldest
+  * Most Clicked
+  * Least Clicked
+* Automatic refresh every minute
+* Skeleton loading UI
+* Last updated status
 
 ### ⚡ Performance
 
-- Redis cache for click tracking
-- Background worker synchronizes Redis → PostgreSQL every 60 seconds
-- Significantly reduces database writes
-- Near real-time analytics
+* Redis cache for click tracking
+* Background worker synchronizes Redis → PostgreSQL every 60 seconds
+* Significantly reduces database writes
+* Near real-time analytics
 
 ### 🛡️ Rate Limiting
 
-- Configurable per-IP rate limiting
-- Endpoint-specific request limits
-- Redis-backed request counters
-- Atomic `INCR` + `EXPIRE` operations using Lua scripts
-- Returns `429 Too Many Requests` when the limit is exceeded
+* Configurable per-IP rate limiting
+* Endpoint-specific request limits
+* Redis-backed request counters
+* Atomic `INCR` + `EXPIRE` operations using Lua scripts
+* Returns `429 Too Many Requests` when the limit is exceeded
 
 ---
 
@@ -65,24 +77,25 @@ A modern full-stack URL shortening platform built using **React, Node.js, Postgr
 
 ## Frontend
 
-- React 19
-- Vite
-- Zustand
-- Tailwind CSS
-- DaisyUI
-- Axios
-- React Router
-- React Hot Toast
-- Lucide React
+* React 19
+* Vite
+* Zustand
+* Tailwind CSS
+* DaisyUI
+* Axios
+* React Router
+* React Hot Toast
+* Lucide React
+* qrcode.react
 
 ## Backend
 
-- Node.js
-- Express.js
-- PostgreSQL
-- Upstash Redis
-- JWT
-- NanoID
+* Node.js
+* Express.js
+* PostgreSQL
+* Upstash Redis
+* JWT
+* NanoID
 
 ---
 
@@ -114,8 +127,7 @@ A modern full-stack URL shortening platform built using **React, Node.js, Postgr
 
 # ⚡ Click Tracking Flow
 
-```
-
+```text
 User requests Short URL
         │
         ▼
@@ -138,16 +150,41 @@ Background Worker
         │
         ▼
 Batch Update PostgreSQL
-
 ```
 
 This architecture minimizes database writes while maintaining near real-time analytics.
 
 ---
 
+# ⏳ URL Expiration Flow
+
+```text
+User creates Short URL
+        │
+        ▼
+Set optional expiration time
+        │
+        ▼
+Store URL + expiration metadata
+        │
+        ▼
+User requests Short URL
+        │
+        ▼
+Check expiration
+        │
+        ├── Valid ────────► Redirect
+        │
+        └── Expired ──────► Reject / Expired URL Response
+```
+
+Expired URLs can no longer be used for redirection, preventing links from remaining active indefinitely.
+
+---
+
 # 🛡️ Rate Limiting Flow
 
-```
+```text
 Client Request
       │
       ▼
@@ -169,13 +206,14 @@ Check Request Limit
       │
       └── Limit exceeded ───► 429 Too Many Requests
 ```
+
 Rate limits are configurable on a per-endpoint basis, allowing sensitive endpoints such as URL generation and authentication to have stricter limits.
+
 ---
 
 # 📂 Project Structure
 
-```
-
+```text
 Linkora
 │
 ├── backend
@@ -195,9 +233,8 @@ Linkora
 │   └── App.jsx
 │
 ├── images
-|
+│
 └── README.md
-
 ```
 
 ---
@@ -224,7 +261,7 @@ npm install
 npm run dev
 ```
 
-Create a `.env` in backend
+Create a `.env` in `backend`:
 
 ```env
 PORT=
@@ -262,55 +299,61 @@ npm run dev
 
 ## Authentication
 
-| Method | Endpoint | Description |
-|---------|----------|-------------|
-| POST | `/signup` | Register User |
-| POST | `/login` | Login |
-| POST | `/logout` | Logout |
-| GET | `/auth/me` | Get the currently authenticated user's profile |
+| Method | Endpoint   | Description                                    |
+| ------ | ---------- | ---------------------------------------------- |
+| POST   | `/signup`  | Register User                                  |
+| POST   | `/login`   | Login                                          |
+| POST   | `/logout`  | Logout                                         |
+| GET    | `/auth/me` | Get the currently authenticated user's profile |
 
 ---
 
 ## URLs
 
-| Method | Endpoint | Description |
-|---------|----------|-------------|
-| POST | `/generate-code` | Create Short URL |
-| GET | `/code/:shortCode` | Redirect |
+| Method | Endpoint           | Description              |
+| ------ | ------------------ | ------------------------ |
+| POST   | `/generate-code`   | Create Short URL         |
+| GET    | `/code/:shortCode` | Redirect to Original URL |
+| DELETE | `/urls/:id`        | Delete a Short URL       |
+
+> URL management also supports configurable expiration times and frontend QR code generation.
 
 ---
 
 ## Dashboard
 
-| Method | Endpoint | Description |
-|---------|----------|-------------|
-| GET | `/dashboard` | Dashboard Analytics |
+| Method | Endpoint     | Description         |
+| ------ | ------------ | ------------------- |
+| GET    | `/dashboard` | Dashboard Analytics |
 
 ---
 
 # 💡 Engineering Highlights
 
-- JWT authentication using HTTP-only cookies
-- Designed a Redis-backed click tracking system with batched synchronization to PostgreSQL
-- Implemented configurable per-IP rate limiting using Redis
-- Used Lua scripting to atomically execute rate-limit counter and expiration operations
-- Background synchronization worker
-- Reduced PostgreSQL write operations
-- Responsive analytics dashboard
-- Global state management using Zustand
-- Skeleton loading for improved UX
-- Automatic dashboard refresh
+* JWT authentication using HTTP-only cookies
+* Redis-backed click tracking with batched synchronization to PostgreSQL
+* Configurable per-IP rate limiting using Redis
+* Lua scripting to atomically execute rate-limit counter and expiration operations
+* Background synchronization worker running every 60 seconds
+* Reduced PostgreSQL write operations through Redis-based click aggregation
+* URL expiration support for temporary links
+* URL deletion from the analytics dashboard
+* Frontend QR code generation using `qrcode.react`
+* Responsive analytics dashboard
+* Global state management using Zustand
+* Skeleton loading for improved UX
+* Automatic dashboard refresh
 
 ---
 
 # 🔮 Future Improvements
 
-- QR Code generation
-- Custom aliases
-- URL expiration
-- Click history graphs
-- Custom domains
-- Advanced analytics
+* Custom aliases
+* Click history graphs
+* Custom domains
+* Advanced analytics
+* Geographic click analytics
+* Device and browser analytics
 
 ---
 
