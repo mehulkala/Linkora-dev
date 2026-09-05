@@ -1,3 +1,4 @@
+import { Link2 } from "lucide-react";
 import { useState } from "react";
 
 export function UrlForm({ onGenerate, loading }) {
@@ -17,29 +18,62 @@ export function UrlForm({ onGenerate, loading }) {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6">
-
+        <form onSubmit={handleSubmit}>
             <div>
-                <label className="label">
+                <label className="label px-0 mb-1">
                     <span className="label-text text-base font-semibold">
-                        Enter your long URL
+                        Destination URL
                     </span>
                 </label>
 
                 <div className="flex flex-col md:flex-row gap-3">
 
-                    <input
-                        type="url"
-                        placeholder="https://example.com/very/long/url"
-                        className="input input-bordered input-lg h-14 flex-1"
-                        value={url}
-                        onChange={(e) => setUrl(e.target.value)}
-                        disabled={loading}
-                        required
-                    />
+                    {/* URL Input */}
+                    <div className="relative flex-1">
+                        <Link2
+                            size={19}
+                            className="absolute left-4 top-1/2 -translate-y-1/2 text-base-content/40 pointer-events-none"
+                        />
 
+                        <input
+                            type="url"
+                            placeholder="https://example.com/very/long/url"
+                            className="
+                                input
+                                input-bordered
+                                w-full
+                                h-14
+                                pl-11
+                                pr-4
+                                text-base
+                                rounded-lg
+                                focus:border-primary
+                                focus:outline-none
+                                focus:ring-2
+                                focus:ring-primary/20
+                            "
+                            value={url}
+                            onChange={(e) => setUrl(e.target.value)}
+                            disabled={loading}
+                            required
+                        />
+                    </div>
+
+                    {/* Expiration */}
                     <select
-                        className="select select-bordered select-lg h-14"
+                        className="
+                            select
+                            select-bordered
+                            h-14
+                            w-full
+                            md:w-36
+                            text-sm
+                            rounded-lg
+                            focus:border-primary
+                            focus:outline-none
+                            focus:ring-2
+                            focus:ring-primary/20
+                        "
                         value={expiration}
                         onChange={(e) => setExpiration(e.target.value)}
                         disabled={loading}
@@ -51,23 +85,28 @@ export function UrlForm({ onGenerate, loading }) {
                         <option value="never">Never</option>
                     </select>
 
+                    {/* Generate */}
                     <button
                         type="submit"
-                        className="btn btn-primary btn-lg min-w-44"
+                        className="
+                            btn
+                            btn-primary
+                            h-14
+                            w-full
+                            md:w-48
+                            rounded-lg
+                        "
                         disabled={loading}
                     >
                         {loading && (
                             <span className="loading loading-spinner loading-sm"></span>
                         )}
 
-                        {loading
-                            ? "Generating..."
-                            : "Generate URL"}
+                        {loading ? "Generating..." : "Generate Short URL"}
                     </button>
 
                 </div>
             </div>
-
         </form>
     );
 }
