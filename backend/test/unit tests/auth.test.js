@@ -412,7 +412,7 @@ describe("signupHandle", () => {
 
         mockSql.mockRejectedValueOnce({
             code: "23505",
-            constraint: "users_email_key"
+            constraint_name: "users_email_key"
         });
 
         await signupHandle(req, res);
@@ -452,7 +452,7 @@ describe("signupHandle", () => {
 
         mockSql.mockRejectedValueOnce({
             code: "23505",
-            constraint: "users_username_key"
+            constraint_name: "users_username_key"
         });
 
         await signupHandle(req, res);
