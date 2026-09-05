@@ -91,13 +91,13 @@ export const signupHandle = async (req, res) =>{
 
     } catch (error) {
         if(error.code === "23505"){
-            if(error.constraint === "users_email_key"){
+            if(error.constraint_name === "users_email_key"){
                 return res.status(409).json({
                     message: "Email already exists"
                 })
             }
             
-            if(error.constraint === "users_username_key"){
+            if(error.constraint_name === "users_username_key"){
                 return res.status(409).json({
                     message: "Username already exists"
                 })

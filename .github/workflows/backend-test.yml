@@ -10,6 +10,21 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_DB: linkora_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5440:5432
+
+      redis:
+        image: redis:7
+        ports:
+          - 6380:6379
+
     defaults:
       run:
         working-directory: backend
@@ -28,8 +43,29 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run tests
+      - name: Initialize test database
         env:
-            BASE_URL: http://localhost:5000
-            CLIENT_URL: http://localhost:5173
+          PGPASSWORD: postgres
+        run: |
+          psql \
+            -h localhost \
+            -p 5440 \
+            -U postgres \
+            -d linkora_test \
+            -f test/schema.sql
+
+      - name: Run unit tests
+        env:
+          BASE_URL: http://localhost:5000
+          CLIENT_URL: http://localhost:5173
         run: npm test
+
+      - name: Run integration tests
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5440/linkora_test
+          REDIS_URL: redis://localhost:6380
+          JWT_SECRET: test-secret
+          CLIENT_URL: http://localhost:5173
+          BASE_URL: http://localhost:3000
+        run: npm run test:integration

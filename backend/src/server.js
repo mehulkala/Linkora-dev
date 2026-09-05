@@ -1,8 +1,5 @@
 import express from "express";
 import dotenv from "dotenv";
-import apiRoute from "./routes/api.routes.js";
-import codeRoute from "./routes/code.routes.js";
-import authRoutes from "./routes/auth.routes.js";
 import path from "path";
 import { connectDB } from "./lib/db.js";
 import { syncClicks } from "./workers/syncClicks.js";
@@ -11,10 +8,6 @@ import app from "./app.js";
 dotenv.config();
 
 const __dirname = path.resolve();
-
-app.use("/api", apiRoute);
-app.use("/code", codeRoute);
-app.use("/api/auth", authRoutes);
 
 if(process.env.NODE_ENV === "production"){
     app.use(express.static(path.join(__dirname, "../frontend/dist")));
