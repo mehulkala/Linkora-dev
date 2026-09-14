@@ -18,6 +18,27 @@ app.get("/health", (req, res) => {
     });
 });
 
+app.get("/benchmark/redis/:id", async (req, res) => {
+    try {
+        const original_url = await redis.get(req.params.id);
+
+        if (!original_url) {
+            return res.status(404).json({
+                message: "Short code not found in Redis"
+            });
+        }
+
+        return res.status(200).json({
+            cached: true
+        });
+    } catch (error) {
+        console.error("Redis benchmark error:", error);
+        return res.status(500).json({
+            message: "Redis error"
+        });
+    }
+});
+
 app.use("/api", apiRoute);
 app.use("/code", codeRoute);
 app.use("/api/auth", authRoutes);
