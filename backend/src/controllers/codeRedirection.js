@@ -12,8 +12,16 @@ export const codeRedirection = async (req, res) => {
         const original_url = await redis.get(shortCode);
         if(original_url){
             console.log(`Cache HIT: ${shortCode}`)
-            const count = await redis.incr(`Clicks:${shortCode}`);
-            await redis.sadd('pending_clicks', shortCode);
+            await redis.eval(
+                `
+                    redis.call("INCR", KEYS[1])
+                    redis.call("SADD", KEYS[2], ARGV[1])
+
+                    return 1
+                `,
+                [`Clicks:${shortCode}`, "pending_clicks"],
+                [shortCode]
+            );
             return res.redirect(302, original_url);
         }
         console.log(`Cache MISS: ${shortCode}`);
