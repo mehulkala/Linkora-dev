@@ -11,7 +11,6 @@ export const codeRedirection = async (req, res) => {
 
         const original_url = await redis.get(shortCode);
         if(original_url){
-            console.log(`Cache HIT: ${shortCode}`)
             await redis.eval(
                 `
                     redis.call("INCR", KEYS[1])
@@ -24,7 +23,6 @@ export const codeRedirection = async (req, res) => {
             );
             return res.redirect(302, original_url);
         }
-        console.log(`Cache MISS: ${shortCode}`);
     }catch(error){
         console.log("Error querying the redis database");
         console.log(error.message);
@@ -34,9 +32,7 @@ export const codeRedirection = async (req, res) => {
     //check if the database has this id or not
     // if present then redirect else tell that this is invalid shortUrl/shortCode
     try{
-        console.log(req.params);
         const {id: shortCode} = req.params;
-        console.log(shortCode);
         const query = await sql`SELECT original_url, expires_at FROM urls WHERE short_code=${shortCode}`;
         if(query.length === 0){
             return res.status(404).json({
@@ -49,7 +45,7 @@ export const codeRedirection = async (req, res) => {
             return res.redirect(302, `${ENV.CLIENT_URL}/expired`);
         }
 
-        const result = await sql`UPDATE urls SET click_count = click_count + 1 WHERE short_code = ${shortCode}`;
+        await sql`UPDATE urls SET click_count = click_count + 1 WHERE short_code = ${shortCode}`;
 
         // adding the key value pair for the url into the redis databse
         if(expires_at){
