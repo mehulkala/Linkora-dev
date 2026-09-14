@@ -9,18 +9,26 @@ export const codeRedirection = async (req, res) => {
     try{
         const {id: shortCode} = req.params;
 
-        const original_url = await redis.get(shortCode);
-        if(original_url){
-            await redis.eval(
-                `
-                    redis.call("INCR", KEYS[1])
-                    redis.call("SADD", KEYS[2], ARGV[1])
+        const original_url = await redis.eval(
+            `
+                local original_url = redis.call("GET", KEYS[1])
 
-                    return 1
-                `,
-                [`Clicks:${shortCode}`, "pending_clicks"],
-                [shortCode]
-            );
+                if original_url then
+                    redis.call("INCR", KEYS[2])
+                    redis.call("SADD", KEYS[3], ARGV[1])
+                end
+
+                return original_url
+            `,
+            [
+                shortCode,
+                `Clicks:${shortCode}`,
+                "pending_clicks"
+            ],
+            [shortCode]
+        );
+
+        if (original_url) {
             return res.redirect(302, original_url);
         }
     }catch(error){
