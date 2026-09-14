@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import apiRoute from "./routes/api.routes.js";
 import codeRoute from "./routes/code.routes.js";
 import authRoutes from "./routes/auth.routes.js";
+import { redis } from "./lib/redis.js";
 
 const app  = express();
 
