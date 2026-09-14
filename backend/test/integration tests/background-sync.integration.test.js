@@ -189,4 +189,47 @@ describe("Background Click Sync Integration Tests", () => {
 
         expect(pending).not.toContain(shortCode);
     });
+
+    test("should not double-count when two workers sync the same URL concurrently", async () => {
+    const shortCode = nanoid(6);
+
+    const result = await sql`
+        INSERT INTO urls (
+            short_code,
+            original_url,
+            click_count
+        )
+        VALUES (
+            ${shortCode},
+            'https://example.com',
+            0
+        )
+        RETURNING id
+    `;
+
+    const urlId = result[0].id;
+
+    await redis.set(`Clicks:${shortCode}`, "10");
+    await redis.sadd("pending_clicks", shortCode);
+
+    // Simulate two workers running at the same time.
+    await Promise.all([
+        syncClicks(),
+        syncClicks()
+    ]);
+
+    const rows = await sql`
+        SELECT click_count
+        FROM urls
+        WHERE id = ${urlId}
+    `;
+
+    expect(Number(rows[0].click_count)).toBe(10);
+
+    expect(await redis.get(`Clicks:${shortCode}`)).toBeNull();
+
+    expect(
+        await redis.smembers("pending_clicks")
+    ).not.toContain(shortCode);
+});
 });
